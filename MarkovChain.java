@@ -1,6 +1,7 @@
 package markovize;
 
 import java.util.Random;
+import java.util.Vector;
 
 public class MarkovChain {	
 	/* SYNTAX
@@ -19,13 +20,39 @@ public class MarkovChain {
 		pairTable = new float[charTable.length][charTable.length];
 	}
 	
-	public void learn(int curpos, int next) {
+	// learn a single pair
+	private void learn(int curpos, int next) {
 		if (!normalized) {
 			pairTable[curpos][next]++;
 		} else {
-			System.err.println("Warning: Chain already normalized! Ignoring word learning.");
+			System.err.println("Warning: Chain already normalized! Ignoring learn(int,int).");
 		}
-		
+	}
+	
+	// learn a word
+	public void learnWord(String word) {
+		if (!normalized) {
+			int prev = 0;
+			for (int i=0; i < word.length(); i++) {
+				char tmpChar = word.charAt(i);
+				int cur = 0;
+				if (tmpChar >= 'A' && tmpChar <= 'Z') {
+					cur = tmpChar-'A'+1;
+				}
+				learn(prev, cur);
+				prev = cur;
+			}
+			learn(prev,0);
+		} else {
+			System.err.println("Warning: Chain already normalized! Ignoring learnWord(String).");
+		}
+	}
+	
+	// learn all words from a Vector<String>
+	public void learnWords(Vector<String> wordList) {
+		for (int i=0; i<wordList.size(); i++) {
+			learnWord(wordList.get(i));
+		}
 	}
 	
 	// debug method, dumps the current chain
@@ -75,7 +102,7 @@ public class MarkovChain {
 			String res = "";
 			int cur = 0;
 			do {
-				cur = this.next(cur);
+				cur = next(cur);
 				if (cur > 0) {
 					if (res == "") { // Capitalize the name
 							res += (char)(cur+'A'-1);
@@ -93,32 +120,3 @@ public class MarkovChain {
 	}
 	
 }
-
-
-
-
-
-
-
-/*	TODO
-
-public class MarkovChain {	
-	
-	
-	public MarkovChain(int alphabetSize, int rememberNChars) {
-		
-	}
-	
-	public void learn(int curpos, int next) {
-		this.table[curpos][next]++;
-	}
-	public void normalize() {
-
-	}
-	
-	public int next(int curpos) {
-		return 0;
-	}
-}
-*/
-

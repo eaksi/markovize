@@ -22,20 +22,11 @@ public class Markovize {
 		
 		MarkovChain chain = new MarkovChain();
 		
-		for (int i=0; i<wordList.size(); i++) {
-			String word = wordList.get(i);
-			int prev = 0;
-			for (int j=0; j < word.length(); j++) {
-				char tmpChar = word.charAt(j);
-				int cur = 0;
-				if (tmpChar >= 'A' && tmpChar <= 'Z') {
-					cur = tmpChar-'A'+1;
-				}
-				chain.learn(prev, cur);
-				prev = cur;
-			}
-			chain.learn(prev,0);
-		}
+		/*for (int i=0; i<wordList.size(); i++) {
+			chain.learnWord(wordList.get(i));
+		}*/
+		
+		chain.learnWords(wordList);
 		
 		chain.normalize();
 				
