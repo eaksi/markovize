@@ -40,22 +40,9 @@ public class Markovize {
 		chain.normalize();
 				
 		for (int i=0; i<20; i++) {
-			String res = "";
-			int cur = 0;
-			do {
-				cur = chain.next(cur);
-				
-				if (cur > 0) {
-					if (res == "") { // Capitalize the name
-						res += (char)(cur+'A'-1);
-					} else {
-						res += (char)(cur+'a'-1);
-					}
-				}
-				
-			} while(cur != 0);
-			System.out.println(res);
+			System.out.println(chain.getOutput());
 		}
+		
 	} // end main
 
 	public static void printList(){

@@ -23,13 +23,14 @@ public class MarkovChain {
 		if (!normalized) {
 			pairTable[curpos][next]++;
 		} else {
-			System.err.println("Warning: ");
+			System.err.println("Warning: Chain already normalized! Ignoring word learning.");
 		}
 		
 	}
 	
 	// debug method, dumps the current chain
 	public void printChain() {
+		System.out.println("Normalized: "+ normalized);
 		for (int i=0; i<pairTable.length; i++) {
 			for (int j=0; j<pairTable[i].length; j++) {
 				System.out.println(pairTable[i][j]);
@@ -39,19 +40,24 @@ public class MarkovChain {
 	
 	// replace pairTable occurences with probabilities
 	public void normalize() {
-		normalized = true;
-		for (int i=0; i<pairTable.length; i++) {
-			float sum = 0;
-			for (int j=0; j<pairTable[i].length; j++) {
-				sum += pairTable[i][j];
+		if (!normalized) {
+			normalized = true;
+			for (int i=0; i<pairTable.length; i++) {
+				float sum = 0;
+				for (int j=0; j<pairTable[i].length; j++) {
+					sum += pairTable[i][j];
+				}
+				for (int j=0; j<pairTable[i].length; j++) {
+					pairTable[i][j] /= sum;
+				}
 			}
-			for (int j=0; j<pairTable[i].length; j++) {
-				pairTable[i][j] /= sum;
-			}
+		} else {
+			System.err.println("Warning: Chain already normalized! Ignoring second normalization.");
 		}
 	}
 	
-	public int next(int curpos) {
+	// get next element of the chain
+	private int next(int curpos) {
 		float randomNr = rnd.nextFloat();
 		for (int i=0; i<pairTable[curpos].length; i++) {
 //		System.out.println("nextloop: "+i+" "+randomNr+" "+pairTable[curpos][i]); //debug
@@ -62,6 +68,30 @@ public class MarkovChain {
 		}
 		return 0;
 	}
+	
+	// get the randomized output of current Markov chain
+	public String getOutput() {
+		if (normalized) {
+			String res = "";
+			int cur = 0;
+			do {
+				cur = this.next(cur);
+				if (cur > 0) {
+					if (res == "") { // Capitalize the name
+							res += (char)(cur+'A'-1);
+					} else {
+						res += (char)(cur+'a'-1);
+					}
+				}
+				
+			} while(cur != 0);
+			return res;
+		} else {
+			System.err.println("Warning: Chain not yet normalized! returning output 'foobar'");
+			return "foobar";
+		}
+	}
+	
 }
 
 
