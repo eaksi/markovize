@@ -20,7 +20,7 @@ public class Markovize {
 				
 		openFile("dist.male.first_trimmed"," ",true);
 		
-		MarkovChain chain = new MarkovChain();
+		MarkovChain chain = new MarkovChain(1);
 		
 		/*for (int i=0; i<wordList.size(); i++) {
 			chain.learnWord(wordList.get(i));
@@ -33,6 +33,8 @@ public class Markovize {
 		for (int i=0; i<20; i++) {
 			System.out.println(chain.getOutput());
 		}
+		
+		chain.printChain();
 		
 	} // end main
 
