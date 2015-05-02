@@ -58,19 +58,29 @@ public class MarkovChain {
 	}
 	
 	public int ordersArrayToInt(int[] nrs) { //FIXME: set to private after debugging
-		int combined = 0;
-		int multiplier = 1;
+		int sum = 0;
 		for (int i=0; i < nrs.length; i++) {
-			if (nrs.length-i == 0) {
-				combined += nrs[i];
-			} else {
-				combined += multiplier * nrs[i];
-			}
-			
-			multiplier *= charTable.length;
+			 sum = (sum * charTable.length) + nrs[i];
 		}
-		return combined;
+		return sum;
 	}
+	
+	public int[] intToOrdersArray(int nr, int ord) { //FIXME: set to private after debugging, set ord to orders
+		int[] separated = new int[ord];
+		int multiplier = charTable.length;
+		for (int i = ord-1; i >= 0; i--) {
+			separated[i] = nr % multiplier;
+			//nr -= nr % multiplier;
+			nr /= multiplier;
+			
+		}
+		return separated;
+	}
+
+	public int[] intToOrdersArray(int nr) {
+		return intToOrdersArray(nr,orders);
+	}
+	
 	
 	
 	// learn all words from a Vector<String>

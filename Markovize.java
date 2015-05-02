@@ -22,10 +22,6 @@ public class Markovize {
 		
 		MarkovChain chain = new MarkovChain(1);
 		
-		/*for (int i=0; i<wordList.size(); i++) {
-			chain.learnWord(wordList.get(i));
-		}*/
-		
 		chain.learnWords(wordList);
 		
 		chain.normalize();
@@ -33,11 +29,34 @@ public class Markovize {
 		/*for (int i=0; i<20; i++) {
 			System.out.println(chain.getOutput());
 		}
+		*/
 		
-		chain.printChain();*/
+		//chain.printChain();
 		
-		int[] temps = {26,26,26,26};
-		System.out.println(chain.ordersArrayToInt(temps));
+		
+		
+		
+		// Below is a test for array->int->array conversion 
+		/*int[] temps = {23,24,25,7,1};
+		System.out.print("{");
+		for (int i=0;i < temps.length; i++){
+			System.out.print(temps[i]);
+			if (temps.length-1 != i) {
+				System.out.print(",");
+			}
+		}
+		int tempNr = chain.ordersArrayToInt(temps);
+		System.out.print("} -> "+tempNr+" -> {");
+		
+		int[] temps2 = chain.intToOrdersArray(tempNr,temps.length);
+		for (int i=0;i < temps2.length; i++){
+			System.out.print(temps2[i]);
+			if (temps2.length-1 != i) {
+				System.out.print(",");
+			}
+		}
+		System.out.println("}");*/
+		
 		
 	} // end main
 
