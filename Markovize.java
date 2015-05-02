@@ -30,11 +30,14 @@ public class Markovize {
 		
 		chain.normalize();
 				
-		for (int i=0; i<20; i++) {
+		/*for (int i=0; i<20; i++) {
 			System.out.println(chain.getOutput());
 		}
 		
-		chain.printChain();
+		chain.printChain();*/
+		
+		int[] temps = {26,26,26,26};
+		System.out.println(chain.ordersArrayToInt(temps));
 		
 	} // end main
 

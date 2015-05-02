@@ -3,7 +3,7 @@ package markovize;
 import java.util.Random;
 import java.util.Vector;
 
-public class MarkovChain {	
+public class MarkovChain {
 
 	private static Random rnd = new Random();
 	private char[] charTable =  {'#','A','B','C','D','E','F','G','H','I','J','K',
@@ -21,46 +21,67 @@ public class MarkovChain {
 			orders = 1;
 		}
 		
-		// Math.pow turns the int to Double, must be rounded back to int //FIXME: more elegant solution
+		// Math.pow turns the int to Double, must be rounded back to int //FIXME: more elegant solution, for-loop?
 		pairTable = new float[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
 	}
 	
-	// learn a single pair //FIXME: orders>1
-	private void learn(int curpos, int next) {
+	// learn a single pair
+	private void learn(int curr, int next) {
 		if (!normalized) {
-			pairTable[curpos][next]++;
+			pairTable[curr][next]++;
 		} else {
 			System.err.println("Warning: Chain already normalized! Ignoring learn(int,int).");
 		}
+		
+		
 	}
-	
-	// learn a word //FIXME: orders>1
+
+//FIXME: orders>1
+	// learn a word 
 	public void learnWord(String word) {
 		if (!normalized) {
 			int prev = 0;
-			for (int i=0; i < word.length(); i++) {
-				char tmpChar = word.charAt(i);
-				int cur = 0;
-				if (tmpChar >= 'A' && tmpChar <= 'Z') {
-					cur = tmpChar-'A'+1;
+			for (int i=0; i < word.length(); i++) { //fine 
+				char tmpChar = word.charAt(i); //fine
+				int cur = 0; //fine
+				
+				if (tmpChar >= 'A' && tmpChar <= 'Z') { //fine
+					cur = tmpChar-'A'+1; //fine
 				}
 				learn(prev, cur);
 				prev = cur;
 			}
-			learn(prev,0);
+			learn(prev,0); //fine
 		} else {
 			System.err.println("Warning: Chain already normalized! Ignoring learnWord(String).");
 		}
 	}
 	
+	public int ordersArrayToInt(int[] nrs) { //FIXME: set to private after debugging
+		int combined = 0;
+		int multiplier = 1;
+		for (int i=0; i < nrs.length; i++) {
+			if (nrs.length-i == 0) {
+				combined += nrs[i];
+			} else {
+				combined += multiplier * nrs[i];
+			}
+			
+			multiplier *= charTable.length;
+		}
+		return combined;
+	}
+	
+	
 	// learn all words from a Vector<String>
 	public void learnWords(Vector<String> wordList) {
-		for (int i=0; i<wordList.size(); i++) {
+		for (int i=0; i < wordList.size(); i++) {
 			learnWord(wordList.get(i));
 		}
 	}
 	
-	// debug method, dumps the current chain //FIXME: orders>1
+//FIXME: orders>1
+	// debug method, dumps the current chain
 	public void printChain() {
 		System.out.println("Normalized: "+ normalized);
 		for (int i=0; i<pairTable.length; i++) {
