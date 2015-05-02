@@ -36,22 +36,36 @@ public class MarkovChain {
 		
 	}
 
-//FIXME: orders>1
-	// learn a word 
+
+	// learn a word //FIXME: orders=2 only
 	public void learnWord(String word) {
+		int prevs[] = new int[orders];
+		
 		if (!normalized) {
-			int prev = 0;
-			for (int i=0; i < word.length(); i++) { //fine 
-				char tmpChar = word.charAt(i); //fine
-				int cur = 0; //fine
-				
-				if (tmpChar >= 'A' && tmpChar <= 'Z') { //fine
-					cur = tmpChar-'A'+1; //fine
-				}
-				learn(prev, cur);
-				prev = cur;
+			
+			for (int i = 0; i < orders; i++) {
+				prevs[i] = 0;
 			}
-			learn(prev,0); //fine
+
+			for (int i = 0; i < word.length(); i++) {
+				char tmpChar = word.charAt(i);
+				int cur = 0;
+				
+				if (tmpChar >= 'A' && tmpChar <= 'Z') {
+					cur = tmpChar-'A'+1;
+				}
+				
+				learn(ordersArrayToInt(prevs), cur);
+				//System.out.println("["+charTable[prevs[0]]+","+charTable[prevs[1]]+"]->"+charTable[cur]); // debug
+				prevs[0] = prevs[1];
+				prevs[1] = cur;
+				//learn(ordersArrayToInt(prevs),0);
+
+			}
+			learn(ordersArrayToInt(prevs),0); // end of word
+			//System.out.println("end:["+charTable[prevs[0]]+","+charTable[prevs[1]]+"]->#"); // debug end of word
+
+			
 		} else {
 			System.err.println("Warning: Chain already normalized! Ignoring learnWord(String).");
 		}
@@ -88,18 +102,22 @@ public class MarkovChain {
 		for (int i=0; i < wordList.size(); i++) {
 			learnWord(wordList.get(i));
 		}
+		System.out.println("All learned!");
 	}
 	
 //FIXME: orders>1
 	// debug method, dumps the current chain
 	public void printChain() {
 		System.out.println("Normalized: "+ normalized);
-		for (int i=0; i<pairTable.length; i++) {
+/*		for (int i=0; i<pairTable.length; i++) {
 			for (int j=0; j<pairTable[i].length; j++) {
 				System.out.print(charTable[i]+""+charTable[j]+": "+pairTable[i][j]+"; ");
 			}
 			System.out.print("\n");
-		}
+		}*/
+		
+		
+		
 	}
 	
 	// replace pairTable occurences with probabilities
@@ -132,21 +150,27 @@ public class MarkovChain {
 		return 0; // end of word
 	}
 	
-	// get the randomized output of current Markov chain
+	// get the randomized output of current Markov chain //FIXME: orders=2 only
 	public String getOutput() {
 		if (normalized) {
 			String res = "";
 			int cur = 0; // every word starts at 0
+			int beforeCur = 0;
+			int nxt = 0;
 			do {
-				cur = next(cur);
-				if (cur > 0) {
+				nxt = next(beforeCur*charTable.length + cur);
+				//System.out.println("sttr " + charTable[beforeCur] +","+ charTable[cur] + " -> "+charTable[nxt]);
+				beforeCur = cur;
+				cur = nxt;
+				
+				if (nxt > 0) {
 					if (res == "") { // capitalization
-							res += (char)(cur+'A'-1);
+							res += (char)(nxt+'A'-1);
 					} else {
-						res += (char)(cur+'a'-1);
+						res += (char)(nxt+'a'-1);
 					}
 				}				
-			} while(cur != 0);
+			} while(nxt != 0 /*&& res.length() < 20*/);
 			return res;
 		} else {
 			System.err.println("Warning: Chain not yet normalized! returning output 'foobar'");

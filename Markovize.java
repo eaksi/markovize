@@ -18,18 +18,26 @@ public class Markovize {
 	
 	public static void main(String args[]) {
 				
-		openFile("dist.male.first_trimmed"," ",true);
+		//openFile("dist.female.first_trimmed"," ",true);
+		openFile("dist.male.first_trimmed_100"," ",true);
 		
-		MarkovChain chain = new MarkovChain(1);
+		MarkovChain chain = new MarkovChain(2);
 		
 		chain.learnWords(wordList);
 		
 		chain.normalize();
-				
-		/*for (int i=0; i<20; i++) {
-			System.out.println(chain.getOutput());
+			
+		String tmpOutput;
+		for (int i=0; i<20; i++) {
+			//System.out.println("getoutput:");
+			tmpOutput = chain.getOutput();
+			
+			while (tmpOutput.length() < 4) {
+					tmpOutput = chain.getOutput();
+			}
+			System.out.println(tmpOutput);
 		}
-		*/
+		
 		
 		//chain.printChain();
 		
