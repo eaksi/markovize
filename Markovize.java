@@ -18,8 +18,8 @@ public class Markovize {
 	
 	public static void main(String args[]) {
 				
-		//openFile("dist.female.first_trimmed"," ",true);
-		openFile("dist.male.first_trimmed_100"," ",true);
+		openFile("dist.female.first_trimmed"," ",true);
+		//openFile("dist.male.first_trimmed_100"," ",true);
 		
 		MarkovChain chain = new MarkovChain(2);
 		
@@ -74,6 +74,7 @@ public class Markovize {
 		}
 	}
 	
+	// FIXME: move to another class 
 	// trim lines at trimAt character/string, trim whitespace, to uppercase (optional), add to wordList
 	public static void openFile(String sourcePath, String trimAt, boolean uppercase) {
 		String line;
@@ -103,6 +104,7 @@ public class Markovize {
 		// finally statement not needed in JDK 7+, autoclose		
 	}
 	
+	// FIXME: move to another class
 	// write current wordList to file
 	public static void writeListToFile(String destPath) {
 		try {

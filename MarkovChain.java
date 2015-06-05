@@ -25,6 +25,7 @@ public class MarkovChain {
 		pairTable = new float[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
 	}
 	
+	// FIXME: change to dual arrays
 	// learn a single pair
 	private void learn(int curr, int next) {
 		if (!normalized) {
@@ -71,6 +72,7 @@ public class MarkovChain {
 		}
 	}
 	
+	// turn the array of ints to one int (when multiple orders)
 	public int ordersArrayToInt(int[] nrs) { //FIXME: set to private after debugging
 		int sum = 0;
 		for (int i=0; i < nrs.length; i++) {
@@ -79,14 +81,13 @@ public class MarkovChain {
 		return sum;
 	}
 	
+	// turn the int into an array of ints (when multiple orders)
 	public int[] intToOrdersArray(int nr, int ord) { //FIXME: set to private after debugging, set ord to orders
 		int[] separated = new int[ord];
 		int multiplier = charTable.length;
 		for (int i = ord-1; i >= 0; i--) {
 			separated[i] = nr % multiplier;
-			//nr -= nr % multiplier;
 			nr /= multiplier;
-			
 		}
 		return separated;
 	}
@@ -105,7 +106,8 @@ public class MarkovChain {
 		System.out.println("All learned!");
 	}
 	
-//FIXME: orders>1
+	// FIXME: change to dual arrays
+	// FIXME: orders>1
 	// debug method, dumps the current chain
 	public void printChain() {
 		System.out.println("Normalized: "+ normalized);
@@ -115,11 +117,10 @@ public class MarkovChain {
 			}
 			System.out.print("\n");
 		}*/
-		
-		
-		
+
 	}
 	
+	// FIXME: change to dual arrays
 	// replace pairTable occurences with probabilities
 	public void normalize() {
 		if (!normalized) {
@@ -138,7 +139,7 @@ public class MarkovChain {
 		}
 	}
 	
-	// get next element of the chain
+	// get next element of the chain (output from normalized chain)
 	private int next(int curpos) {
 		float randomNr = rnd.nextFloat();
 		for (int i=0; i<pairTable[curpos].length; i++) {
@@ -150,7 +151,11 @@ public class MarkovChain {
 		return 0; // end of word
 	}
 	
-	// get the randomized output of current Markov chain //FIXME: orders=2 only
+	
+	 
+	// FIXME: currently orders=2 only
+	// FIXME: change to dual arrays
+	// get the randomized output of current Markov chain
 	public String getOutput() {
 		if (normalized) {
 			String res = "";
