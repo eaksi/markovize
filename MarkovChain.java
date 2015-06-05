@@ -8,8 +8,10 @@ public class MarkovChain {
 	private static Random rnd = new Random();
 	private char[] charTable =  {'#','A','B','C','D','E','F','G','H','I','J','K',
 		'L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-	private float[][] pairTable;
-	private boolean normalized = false; // has the table been normalized (occurences -> probabilities)
+	private float[][] hitsTable; // non-normalized table, instances of pair hits //FIXME: change to int array
+	private float[][] normTable; // normalized table, probabilities
+	private boolean normalized = false; // has the table been normalized recently
+	private boolean normalizedAtLeastOnce = false; // has the table been normalized (occurences -> probabilities)
 	private int orders;
 	
 	// generate a new MarkovChain object with a number or orders (letters preceeding)
@@ -22,67 +24,68 @@ public class MarkovChain {
 		}
 		
 		// Math.pow turns the int to Double, must be rounded back to int //FIXME: more elegant solution, for-loop?
-		pairTable = new float[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
+		hitsTable = new float[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
+		normTable = new float[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
 	}
 	
-	// FIXME: change to dual arrays
-	// learn a single pair
+	// learn a single hit
 	private void learn(int curr, int next) {
-		if (!normalized) {
-			pairTable[curr][next]++;
-		} else {
-			System.err.println("Warning: Chain already normalized! Ignoring learn(int,int).");
-		}
-		
-		
+		if (normalized) {
+			System.err.println("Warning: Chain already normalized, but adding to hits table.");
+		}	
+		hitsTable[curr][next]++;
 	}
 
-
-	// learn a word //FIXME: orders=2 only
+	// FIXME: currently orders=2 only
+	// learn a word
 	public void learnWord(String word) {
 		int prevs[] = new int[orders];
-		
-		if (!normalized) {
+
+		// initialize temp array
+		for (int i = 0; i < orders; i++) {
+			prevs[i] = 0;
+		}
+
+		for (int i = 0; i < word.length(); i++) {
+			char tmpChar = word.charAt(i);
+			int cur = 0;
 			
-			for (int i = 0; i < orders; i++) {
-				prevs[i] = 0;
+			if (tmpChar >= 'A' && tmpChar <= 'Z') {
+				cur = tmpChar-'A'+1;
 			}
+			
+			learn(ordersArrayToInt(prevs), cur);
+			prevs[0] = prevs[1]; //FIXME
+			prevs[1] = cur; // FIXME
+			//learn(ordersArrayToInt(prevs),0);
+		}	
 
-			for (int i = 0; i < word.length(); i++) {
-				char tmpChar = word.charAt(i);
-				int cur = 0;
-				
-				if (tmpChar >= 'A' && tmpChar <= 'Z') {
-					cur = tmpChar-'A'+1;
-				}
-				
-				learn(ordersArrayToInt(prevs), cur);
-				//System.out.println("["+charTable[prevs[0]]+","+charTable[prevs[1]]+"]->"+charTable[cur]); // debug
-				prevs[0] = prevs[1];
-				prevs[1] = cur;
-				//learn(ordersArrayToInt(prevs),0);
-
-			}
+		if (word.length() != 0) { 	// test to prevent 0 letter words from happening
 			learn(ordersArrayToInt(prevs),0); // end of word
-			//System.out.println("end:["+charTable[prevs[0]]+","+charTable[prevs[1]]+"]->#"); // debug end of word
-
-			
-		} else {
-			System.err.println("Warning: Chain already normalized! Ignoring learnWord(String).");
 		}
 	}
 	
+	// learn all words from a Vector<String>
+	public void learnWords(Vector<String> wordList) {
+		for (int i=0; i < wordList.size(); i++) {
+			learnWord(wordList.get(i));
+		}
+		System.out.println("Words learnt!");
+	}
+	
+	// FIXME: set to private after debugging orders>2
 	// turn the array of ints to one int (when multiple orders)
-	public int ordersArrayToInt(int[] nrs) { //FIXME: set to private after debugging
+	public int ordersArrayToInt(int[] nrs) {
 		int sum = 0;
 		for (int i=0; i < nrs.length; i++) {
 			 sum = (sum * charTable.length) + nrs[i];
 		}
 		return sum;
 	}
-	
+	 
+	// FIXME: set to private after debugging orders>2, set ord to orders
 	// turn the int into an array of ints (when multiple orders)
-	public int[] intToOrdersArray(int nr, int ord) { //FIXME: set to private after debugging, set ord to orders
+	public int[] intToOrdersArray(int nr, int ord) {
 		int[] separated = new int[ord];
 		int multiplier = charTable.length;
 		for (int i = ord-1; i >= 0; i--) {
@@ -96,68 +99,60 @@ public class MarkovChain {
 		return intToOrdersArray(nr,orders);
 	}
 	
-	
-	
-	// learn all words from a Vector<String>
-	public void learnWords(Vector<String> wordList) {
-		for (int i=0; i < wordList.size(); i++) {
-			learnWord(wordList.get(i));
-		}
-		System.out.println("All learned!");
-	}
-	
-	// FIXME: change to dual arrays
-	// FIXME: orders>1
+	// FIXME: rewrite entirely
 	// debug method, dumps the current chain
 	public void printChain() {
 		System.out.println("Normalized: "+ normalized);
-/*		for (int i=0; i<pairTable.length; i++) {
-			for (int j=0; j<pairTable[i].length; j++) {
-				System.out.print(charTable[i]+""+charTable[j]+": "+pairTable[i][j]+"; ");
+/*		for (int i=0; i<normTable.length; i++) {
+			for (int j=0; j<normTable[i].length; j++) {
+				System.out.print(charTable[i]+""+charTable[j]+": "+normTable[i][j]+"; ");
 			}
 			System.out.print("\n");
 		}*/
 
 	}
 	
-	// FIXME: change to dual arrays
-	// replace pairTable occurences with probabilities
+	// calculate hits from hitsTable into probabilities for normTable
 	public void normalize() {
+		System.out.println("*Start Normalize*");
 		if (!normalized) {
+			normalizedAtLeastOnce = true;
 			normalized = true;
-			for (int i=0; i<pairTable.length; i++) {
+			for (int i=0; i<hitsTable.length; i++) {
 				float sum = 0;
-				for (int j=0; j<pairTable[i].length; j++) {
-					sum += pairTable[i][j];
+				for (int j=0; j<hitsTable[i].length; j++) {
+					sum += hitsTable[i][j];
 				}
-				for (int j=0; j<pairTable[i].length; j++) {
-					pairTable[i][j] /= sum;
+				for (int j=0; j<hitsTable[i].length; j++) {
+					normTable[i][j] = hitsTable[i][j] / sum;
 				}
 			}
 		} else {
-			System.err.println("Warning: Chain already normalized! Ignoring second normalization.");
+			System.err.println("Warning: Chain already normalized with current word list");
 		}
+		System.out.println("*End Normalize*");
 	}
 	
-	// get next element of the chain (output from normalized chain)
+	// get next element of the chain (output from normalized chain), called only from getOutput()
 	private int next(int curpos) {
 		float randomNr = rnd.nextFloat();
-		for (int i=0; i<pairTable[curpos].length; i++) {
-			if (pairTable[curpos][i] > randomNr) {
+		for (int i=0; i<normTable[curpos].length; i++) {
+			if (normTable[curpos][i] > randomNr) {
 				return i; // next letter
 			}
-			randomNr -= pairTable[curpos][i];
+			randomNr -= normTable[curpos][i];
 		}
 		return 0; // end of word
 	}
-	
-	
-	 
+		 
 	// FIXME: currently orders=2 only
-	// FIXME: change to dual arrays
+	// TODO: set possible character limit for words and test 
 	// get the randomized output of current Markov chain
 	public String getOutput() {
-		if (normalized) {
+		if (normalizedAtLeastOnce) {
+			if (!normalized) { 
+				System.err.println("Warning: words added since last normalization");
+			}
 			String res = "";
 			int cur = 0; // every word starts at 0
 			int beforeCur = 0;
@@ -175,12 +170,11 @@ public class MarkovChain {
 						res += (char)(nxt+'a'-1);
 					}
 				}				
-			} while(nxt != 0 /*&& res.length() < 20*/);
+			} while(nxt != 0 /*&& res.length() < 20*/); //TODO: character limits
 			return res;
 		} else {
-			System.err.println("Warning: Chain not yet normalized! returning output 'foobar'");
+			System.err.println("Error: Chain not yet normalized! returning output 'foobar'");
 			return "foobar";
 		}
 	}
-	
 }

@@ -17,7 +17,8 @@ public class Markovize {
 	private static Vector<String> wordList = new Vector<String>();
 	
 	public static void main(String args[]) {
-				
+		
+		System.out.println("*Starting*");		
 		openFile("dist.female.first_trimmed"," ",true);
 		//openFile("dist.male.first_trimmed_100"," ",true);
 		
@@ -65,7 +66,7 @@ public class Markovize {
 		}
 		System.out.println("}");*/
 		
-		
+		System.out.println("*End program*");	
 	} // end main
 
 	public static void printList(){
