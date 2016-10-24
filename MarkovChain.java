@@ -1,44 +1,52 @@
 package markovize;
 
 import java.util.Random;
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class MarkovChain {
 
 	private static Random rnd = new Random();
 	private char[] charTable =  {'#','A','B','C','D','E','F','G','H','I','J','K',
 		'L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-	private float[][] hitsTable; // non-normalized table, instances of pair hits //FIXME: change to int array
+	private int[][] hitsTable; // non-normalized table, instances of hits
 	private float[][] normTable; // normalized table, probabilities
 	private boolean normalized = false; // has the table been normalized recently
 	private boolean normalizedAtLeastOnce = false; // has the table been normalized (occurences -> probabilities)
 	private int orders;
 	
+	// FIXME: currently orders=2 only
 	// generate a new MarkovChain object with a number or orders (letters preceeding)
 	public MarkovChain(int ord) {
-		if (ord >= 1) {
+		if (ord == 2) {
 			orders = ord;
 		} else {
-			System.err.println("Warning: number of orders < 1, defaulting to 1.");
-			orders = 1;
+			System.err.println("Warning: current version only allows orders=2.");
+			orders = 2;
 		}
 		
-		// Math.pow turns the int to Double, must be rounded back to int //FIXME: more elegant solution, for-loop?
-		hitsTable = new float[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
+		// FIXME: more elegant solution, for-loop?
+		// Math.pow turns the int to Double, must be rounded back to int
+		hitsTable = new int[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
 		normTable = new float[(int)Math.round(Math.pow(charTable.length,orders))][charTable.length];
 	}
 	
-	// learn a single hit
+	/**
+	 * Learns a single hit. Mostly a convenience method.
+	 */
 	private void learn(int curr, int next) {
-		if (normalized) {
-			System.err.println("Warning: Chain already normalized, but adding to hits table.");
-		}	
 		hitsTable[curr][next]++;
 	}
 
 	// FIXME: currently orders=2 only
-	// learn a word
+	/**
+	 * Takes a word as parameter, processes and learns it.
+	 */
 	public void learnWord(String word) {
+		if (normalized) {
+			System.err.println("Warning: Chain already normalized. Added the world and set normalized to false");
+			normalized = false;
+		}	
+
 		int prevs[] = new int[orders];
 
 		// initialize temp array
@@ -55,8 +63,10 @@ public class MarkovChain {
 			}
 			
 			learn(ordersArrayToInt(prevs), cur);
+			/*************************/
 			prevs[0] = prevs[1]; //FIXME
 			prevs[1] = cur; // FIXME
+			/***************************/
 			//learn(ordersArrayToInt(prevs),0);
 		}	
 
@@ -65,8 +75,10 @@ public class MarkovChain {
 		}
 	}
 	
-	// learn all words from a Vector<String>
-	public void learnWords(Vector<String> wordList) {
+	/**
+	 * Learns all words from the word list (ArrayList)
+	 */
+	public void learnWords(ArrayList<String> wordList) {
 		for (int i=0; i < wordList.size(); i++) {
 			learnWord(wordList.get(i));
 		}
@@ -84,11 +96,13 @@ public class MarkovChain {
 	}
 	 
 	// FIXME: set to private after debugging orders>2, set ord to orders
-	// turn the int into an array of ints (when multiple orders)
+	/**
+	 * Turns the int into an array of ints (when multiple orders)
+	 */
 	public int[] intToOrdersArray(int nr, int ord) {
 		int[] separated = new int[ord];
 		int multiplier = charTable.length;
-		for (int i = ord-1; i >= 0; i--) {
+		for (int i = ord - 1; i >= 0; i--) {
 			separated[i] = nr % multiplier;
 			nr /= multiplier;
 		}
@@ -112,7 +126,10 @@ public class MarkovChain {
 
 	}
 	
-	// calculate hits from hitsTable into probabilities for normTable
+	/**
+	 * Normalizes the chain, needs to be called once before getting a markov output.
+	 * Calculates hits from hitsTable into probabilities for normTable.
+	 */ 
 	public void normalize() {
 		System.out.println("*Start Normalize*");
 		if (!normalized) {
@@ -133,7 +150,10 @@ public class MarkovChain {
 		System.out.println("*End Normalize*");
 	}
 	
-	// get next element of the chain (output from normalized chain), called only from getOutput()
+	/**
+	 * Gets the next element of the chain (output from normalized chain),
+	 * called only from getOutput().
+	 */
 	private int next(int curpos) {
 		float randomNr = rnd.nextFloat();
 		for (int i=0; i<normTable[curpos].length; i++) {
@@ -147,7 +167,9 @@ public class MarkovChain {
 		 
 	// FIXME: currently orders=2 only
 	// TODO: set possible character limit for words and test 
-	// get the randomized output of current Markov chain
+	/**
+	 * Gets the randomized output of current Markov chain
+	 */ 
 	public String getOutput() {
 		if (normalizedAtLeastOnce) {
 			if (!normalized) { 

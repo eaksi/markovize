@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 
 /* Generate random names with Markov chains, with base name lists from 1990 US census data:
@@ -14,11 +14,13 @@ import java.util.Vector;
 */
 public class Markovize {
 
-	private static Vector<String> wordList = new Vector<String>();
+	private static ArrayList<String> wordList = new ArrayList<String>();
+	private static int minLetters = 3;
+	private static int nrResults = 20;
 	
 	public static void main(String args[]) {
 		
-		System.out.println("*Starting*");		
+		System.err.println("***Start***");
 		openFile("dist.female.first_trimmed"," ",true);
 		//openFile("dist.male.first_trimmed_100"," ",true);
 		
@@ -29,84 +31,70 @@ public class Markovize {
 		chain.normalize();
 			
 		String tmpOutput;
-		for (int i=0; i<20; i++) {
-			//System.out.println("getoutput:");
+		for (int i = 0; i<nrResults; i++) {
 			tmpOutput = chain.getOutput();
 			
-			while (tmpOutput.length() < 4) {
+			while (tmpOutput.length() < minLetters) {
 					tmpOutput = chain.getOutput();
 			}
 			System.out.println(tmpOutput);
 		}
 		
-		
-		//chain.printChain();
-		
-		
-		
-		
-		// Below is a test for array->int->array conversion 
-		/*int[] temps = {23,24,25,7,1};
-		System.out.print("{");
-		for (int i=0;i < temps.length; i++){
-			System.out.print(temps[i]);
-			if (temps.length-1 != i) {
-				System.out.print(",");
-			}
-		}
-		int tempNr = chain.ordersArrayToInt(temps);
-		System.out.print("} -> "+tempNr+" -> {");
-		
-		int[] temps2 = chain.intToOrdersArray(tempNr,temps.length);
-		for (int i=0;i < temps2.length; i++){
-			System.out.print(temps2[i]);
-			if (temps2.length-1 != i) {
-				System.out.print(",");
-			}
-		}
-		System.out.println("}");*/
-		
-		System.out.println("*End program*");	
+		System.out.println("***End***");	
 	} // end main
 
-	public static void printList(){
+	public static void printList() {
 		for (int i=0; i<wordList.size(); i++) {
-			System.out.println(wordList.get(i));
+			System.err.println(wordList.get(i));
 		}
 	}
 	
-	// FIXME: move to another class 
-	// trim lines at trimAt character/string, trim whitespace, to uppercase (optional), add to wordList
+	// FIXME: move to another class, refactor 
+	/**
+	 *	This method opens a word list file and stores words in wordList.
+	 *  1. Trims lines at (trimAt) String
+	 *  2. Trims whitespace from lines
+	 *  3. converts to uppercase (optional),
+	 *	4. adds the result line to wordList.
+	 */
 	public static void openFile(String sourcePath, String trimAt, boolean uppercase) {
 		String line;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(sourcePath));
-			line = br.readLine();
+			line = br.readLine();	// read first line of file
+			
 			while (line != null) {
+				
 				int firstTrimChar = line.indexOf(trimAt);
-				if (firstTrimChar != -1) { //if trimAt string found
+				
+				if (firstTrimChar != -1) {	//if trimAt string found
 					line = line.substring(0,line.indexOf(trimAt));
 				}
+				
 				line = line.trim(); // trim whitespace
+				
 				if (uppercase) {
 					line = line.toUpperCase();
 				}
+				
 				if (line.length() != 0) {
 					wordList.add(line); // add line to wordList
 				}
 				
 				line = br.readLine(); // read the next line
+				
 			}
 		} catch (FileNotFoundException fnfe) {
 			System.err.println("FileNotFoundException at trimFile: "+sourcePath);
 		} catch (IOException ioe) {
 			System.err.println("IOException at trimFile: "+sourcePath);
-		}
-		// finally statement not needed in JDK 7+, autoclose		
+		}	
 	}
 	
 	// FIXME: move to another class
-	// write current wordList to file
+	/**
+	 * Writes the current wordList to file
+	 */
 	public static void writeListToFile(String destPath) {
 		try {
 			if (wordList.size() > 0) {
