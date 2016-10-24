@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-/* Generate random names with Markov chains, with base name lists from 1990 US census data:
-	http://www.census.gov/topics/population/genealogy/data/1990_census/1990_census_namefiles.html
-*/
+/**
+ *	Generate random names with Markov chains, with base name lists from 1990 US census data:
+ *	http://www.census.gov/topics/population/genealogy/data/1990_census/1990_census_namefiles.html
+ */
 public class Markovize {
 
 	private static ArrayList<String> wordList = new ArrayList<String>();
@@ -22,7 +23,6 @@ public class Markovize {
 		
 		System.err.println("***Start***");
 		openFile("dist.female.first_trimmed"," ",true);
-		//openFile("dist.male.first_trimmed_100"," ",true);
 		
 		MarkovChain chain = new MarkovChain(2);
 		
@@ -31,7 +31,7 @@ public class Markovize {
 		chain.normalize();
 			
 		String tmpOutput;
-		for (int i = 0; i<nrResults; i++) {
+		for (int i = 0; i < nrResults; i++) {
 			tmpOutput = chain.getOutput();
 			
 			while (tmpOutput.length() < minLetters) {
@@ -41,7 +41,7 @@ public class Markovize {
 		}
 		
 		System.out.println("***End***");	
-	} // end main
+	}
 
 	public static void printList() {
 		for (int i=0; i<wordList.size(); i++) {
@@ -93,7 +93,7 @@ public class Markovize {
 	
 	// FIXME: move to another class
 	/**
-	 * Writes the current wordList to file
+	 *	Writes the current wordList to file
 	 */
 	public static void writeListToFile(String destPath) {
 		try {

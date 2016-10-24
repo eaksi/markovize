@@ -3,6 +3,10 @@ package markovize;
 import java.util.Random;
 import java.util.ArrayList;
 
+/**
+ *	MarkovChain is an object that takes a list of words for text generation using Markov chains.
+ *  Also handles the output of generated words.
+ */
 public class MarkovChain {
 
 	private static Random rnd = new Random();
@@ -15,7 +19,9 @@ public class MarkovChain {
 	private int orders;
 	
 	// FIXME: currently orders=2 only
-	// generate a new MarkovChain object with a number or orders (letters preceeding)
+	/**
+	 *	Generates a new MarkovChain object with a number or orders (letters preceeding).
+	 */
 	public MarkovChain(int ord) {
 		if (ord == 2) {
 			orders = ord;
@@ -82,14 +88,16 @@ public class MarkovChain {
 		for (int i=0; i < wordList.size(); i++) {
 			learnWord(wordList.get(i));
 		}
-		System.out.println("Words learnt!");
+		System.out.println("*Words learnt!*");
 	}
 	
 	// FIXME: set to private after debugging orders>2
-	// turn the array of ints to one int (when multiple orders)
-	public int ordersArrayToInt(int[] nrs) {
+	/**
+	 *	Turn the array of ints to one int (when multiple orders).
+	 */
+	private int ordersArrayToInt(int[] nrs) {
 		int sum = 0;
-		for (int i=0; i < nrs.length; i++) {
+		for (int i = 0; i < nrs.length; i++) {
 			 sum = (sum * charTable.length) + nrs[i];
 		}
 		return sum;
@@ -111,19 +119,6 @@ public class MarkovChain {
 
 	public int[] intToOrdersArray(int nr) {
 		return intToOrdersArray(nr,orders);
-	}
-	
-	// FIXME: rewrite entirely
-	// debug method, dumps the current chain
-	public void printChain() {
-		System.out.println("Normalized: "+ normalized);
-/*		for (int i=0; i<normTable.length; i++) {
-			for (int j=0; j<normTable[i].length; j++) {
-				System.out.print(charTable[i]+""+charTable[j]+": "+normTable[i][j]+"; ");
-			}
-			System.out.print("\n");
-		}*/
-
 	}
 	
 	/**
@@ -168,35 +163,34 @@ public class MarkovChain {
 	// FIXME: currently orders=2 only
 	// TODO: set possible character limit for words and test 
 	/**
-	 * Gets the randomized output of current Markov chain
+	 * Gets the randomized output of current Markov chain.
 	 */ 
 	public String getOutput() {
 		if (normalizedAtLeastOnce) {
 			if (!normalized) { 
 				System.err.println("Warning: words added since last normalization");
 			}
-			String res = "";
+			String markovWord = "";
 			int cur = 0; // every word starts at 0
-			int beforeCur = 0;
+			int beforeCur = 0; // FIXME: bad, refactor to orders != 2 
 			int nxt = 0;
 			do {
 				nxt = next(beforeCur*charTable.length + cur);
-				//System.out.println("sttr " + charTable[beforeCur] +","+ charTable[cur] + " -> "+charTable[nxt]);
 				beforeCur = cur;
 				cur = nxt;
 				
 				if (nxt > 0) {
-					if (res == "") { // capitalization
-							res += (char)(nxt+'A'-1);
-					} else {
-						res += (char)(nxt+'a'-1);
-					}
-				}				
-			} while(nxt != 0 /*&& res.length() < 20*/); //TODO: character limits
-			return res;
+					markovWord += (char)(nxt+'a'-1);
+				}
+				
+			} while (nxt != 0);
+
+			// Capitalize string
+			return Character.toUpperCase(markovWord.charAt(0)) + markovWord.substring(1);
+
 		} else {
-			System.err.println("Error: Chain not yet normalized! returning output 'foobar'");
-			return "foobar";
+			System.err.println("Error: Chain not yet normalized! returning output 'FOOBAR'");
+			return "FOOBAR";
 		}
 	}
 }
